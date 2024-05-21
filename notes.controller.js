@@ -39,6 +39,18 @@ async function saveNotes(notes) {
   await fs.writeFile(notesPath, JSON.stringify(notes));
 }
 
+//функция для обновления заметки
+async function updateNote(noteData) {
+  const notes = await getNotes();
+  // ищем id заметки
+  const index = notes.findIndex((note) => note.id === noteData.id);
+  if (index >= 0) {
+    notes[index] = { ...notes[index], ...noteData };
+    await saveNotes(notes);
+    console.log(chalk.bgBlue(`Note with id="${noteData.id}" has been updated`));
+  }
+}
+
 // функция для удаления элемента
 async function removeNote(id) {
   const notes = await getNotes();
@@ -52,4 +64,6 @@ module.exports = {
   addNote,
   printNotes,
   removeNote,
+  getNotes,
+  updateNote,
 };

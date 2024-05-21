@@ -1,53 +1,79 @@
 // делаем код для запуска на сервере для проекта на Node.js
 // запустить терминал, в нем команду node index.js
 
-// подключаем пакет yargs в наш проект
-const yargs = require("yargs");
-const pkg = require("./package.json");
-const { addNote, printNotes, removeNote } = require("./notes.controller");
+const chalk = require("chalk");
+const express = require("express"); // фреймвор express
+const path = require("path");
+const {
+  addNote,
+  getNotes,
+  removeNote,
+  updateNote,
+} = require("./notes.controller");
 
-yargs.version(pkg.version);
+const port = 3000; // задаем порт для работы хоста
 
-// вызываем метод command у объекта yargs
-yargs.command({
-  command: "add",
-  describe: "Add new note to list",
-  builder: {
-    title: {
-      type: "string",
-      describe: "Note title",
-      demandOption: true,
-    },
-  },
-  handler({ title }) {
-    addNote(title);
-  },
+// создаем app для работы express
+const app = express();
+
+// установим шаблонизатор ejs
+app.set("view engine", "ejs");
+// зададим views к папке pages
+app.set("views", "pages");
+
+// сделаем папку public статической
+app.use(express.static(path.resolve(__dirname, "public")));
+
+// encoded for express
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+
+app.use(express.json());
+
+// сервер через expess
+// get запрос
+app.get("/", async (req, res) => {
+  res.render("index", {
+    title: "Express App",
+    notes: await getNotes(),
+    created: false,
+  });
 });
-// еще одна комманда для вывода списка объекта
-yargs.command({
-  command: "list",
-  describe: "Print all notes",
-  async handler() {
-    await printNotes();
-  },
+// post запрос
+app.post("/", async (req, res) => {
+  await addNote(req.body.title);
+  // console.log("Request", req.body);
+  res.render("index", {
+    title: "Express App",
+    notes: await getNotes(),
+    created: true,
+  });
 });
 
-// еще одна комманда для удаления заметки
-yargs.command({
-  command: "remove",
-  describe: "Remove note by id",
-  builder: {
-    id: {
-      type: "string",
-      describe: "Note id",
-      demandOption: true,
-    },
-  },
-
-  async handler({ id }) {
-    await removeNote(id);
-  },
+// добавляем возможность удаления
+app.delete("/:id", async (req, res) => {
+  // console.log("Id", req.params.id);
+  await removeNote(req.params.id);
+  res.render("index", {
+    title: "Express App",
+    notes: await getNotes(),
+    created: false,
+  });
 });
 
-// для инициализации наших новых комманд, чтобы они работали надо вызывать метод parse
-yargs.parse();
+// добавить возможность редактирования
+app.put("/:id", async (req, res) => {
+  await updateNote({ id: req.params.id, title: req.params.title });
+  res.render("index", {
+    title: "Express App",
+    notes: await getNotes(),
+    created: false,
+  });
+});
+
+app.listen(port, () => {
+  console.log(chalk.green(`Server has been started on port ${port} ... `));
+});

@@ -4,6 +4,8 @@
   "description": "This is simple NodeJS Application",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "serve": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -13,8 +15,24 @@
   "author": "Alex Antipov",
   "license": "ISC",
   "dependencies": {
-    "@types/yargs": "^17.0.32",
     "chalk": "^4.1.2",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
     "yargs": "^17.7.2"
+  },
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.12",
+    "@types/yargs": "^17.0.32",
+    "nodemon": "^3.1.0"
   }
 }
